@@ -1,6 +1,8 @@
 @page "/fetchdata"
-@using BlazorApp.Shared 
+@using BlazorApp.Shared
+@using Microsoft.AspNetCore.Authorization
 @inject HttpClient Http
+@attribute [Authorize()]
 
 <h1>Weather forecast</h1>
 
@@ -40,13 +42,13 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-      try
-      {
-        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("/api/WeatherForecast");
-      }
-      catch (Exception ex)
-      {
-        Console.WriteLine(ex.ToString());
-      }
+        try
+        {
+            forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("/api/WeatherForecast");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+        }
     }
 }

@@ -9,7 +9,10 @@
 
 <AuthorizeView>
     <Authorized>
-        @GetNameAsync(context.User.Identity.Name);
+        @if (count == 0)
+        {
+            @GetNameAsync(context.User.Identity.Name);
+        }
 
         @if (string.IsNullOrEmpty(name))
         {
@@ -50,6 +53,7 @@
 
     private string name;
     private string email;
+    private int count = 0;
 
     private async Task GetNameAsync(string identityEmail)
     {
@@ -90,6 +94,9 @@
 
     async Task ShowModal()
     {
+        var parameters = new ModalParameters();
+        parameters.Add("Email", email);
+
         var formModal = Modal.Show<NameModal>("Ange ditt namn");
         var result = await formModal.Result;
 

@@ -12,6 +12,8 @@
         @if (count == 0)
         {
             @GetNameAsync(context.User.Identity.Name);
+
+            count++;
         }
 
         @if (string.IsNullOrEmpty(name))
@@ -92,7 +94,7 @@
         StateHasChanged();
     }
 
-    async Task ShowModal()
+    private async Task ShowModal()
     {
         var parameters = new ModalParameters();
         parameters.Add("Email", email);

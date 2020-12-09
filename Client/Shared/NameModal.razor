@@ -18,16 +18,14 @@
 
     protected override void OnInitialized()
     {
-        User = new User
-        {
-            Created = DateTime.Now,
-            Email = Email,
-        };
+        User = new User();
     }
 
     void SaveUser()
     {
+        User.Email = Email;
+        User.Created = DateTime.Now;
+
         BlazoredModal.Close(ModalResult.Ok<User>(User));
     }
-
 }

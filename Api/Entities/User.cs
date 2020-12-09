@@ -8,6 +8,7 @@ namespace BlazorApp.Api.Entities
         public int UserId { get; set; }
         public string Email { get; set; }
         public DateTime Created { get; set; }
+        public string Name { get; set; }
 
         public virtual ICollection<Activity> Activities { get; set; }
     }

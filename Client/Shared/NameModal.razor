@@ -1,0 +1,33 @@
+﻿@using BlazorApp.Client.Pages.tmp
+<div class="simple-form">
+
+    <div class="form-group">
+        <label for="user-name">Namn</label>
+        <input @bind="@User.Name" type="text" class="form-control" id="user-name" />
+    </div>
+    <button @onclick="SaveUser" class="btn btn-primary">Spara</button>
+</div>
+
+@code {
+
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+
+    [Parameter] public string Email { get; set; }
+
+    User User { get; set; }
+
+    protected override void OnInitialized()
+    {
+        User = new User
+        {
+            Created = DateTime.Now,
+            Email = Email,
+        };
+    }
+
+    void SaveUser()
+    {
+        BlazoredModal.Close(ModalResult.Ok<User>(User));
+    }
+
+}

@@ -8,23 +8,12 @@
 <h1>Välkommen till stegtävlingen 2020!</h1>
 
 <AuthorizeView>
-    <Authorized Context="auth">
-        @email = auth.User.Identity.Name;
-        @GetNameAsync();
+    <Authorized>
+        @GetNameAsync(context.User.Identity.Name);
 
         @if (string.IsNullOrEmpty(name))
         {
-            <EditForm Model="@user" OnValidSubmit="CreateUserAsync">
-                <DataAnnotationsValidator />
-                <ValidationSummary />
-                <div class="form-group">
-                    <label>
-                        Namn:
-                    </label>
-                    <InputText @bind-Value="user.Name" class="form-control"></InputText>
-                </div>
-                <button type="submit" class="btn btn-outline-primary btn-sm">Spara</button>
-            </EditForm>
+            <button type="button" class="btn btn-info" @onclick="(() => ShowModal())">Skapa användare</button>
         }
         else
         {
@@ -57,12 +46,15 @@
 
 @code
 {
+    [CascadingParameter] public IModalService Modal { get; set; }
+
     private string name;
     private string email;
-    private User user;
 
-    private async Task GetNameAsync()
+    private async Task GetNameAsync(string identityEmail)
     {
+        email = identityEmail;
+
         try
         {
             name = await Http.GetFromJsonAsync<string>($"/api/GetUser?email={email}");
@@ -75,17 +67,10 @@
         StateHasChanged();
     }
 
-    private async Task CreateUserAsync()
+    private async Task CreateUserAsync(User user)
     {
         try
         {
-            var userModel = new User
-            {
-                Created = DateTime.Now,
-                Name = user.Name,
-                Email = email
-            };
-
             var data = JsonSerializer.Serialize(user);
 
             var response = await Http.PostAsync("/api/PostUser", new StringContent(data, Encoding.UTF8, "application/json"));
@@ -98,6 +83,25 @@
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
+        }
+
+        StateHasChanged();
+    }
+
+    async Task ShowModal()
+    {
+        var formModal = Modal.Show<NameModal>("Ange ditt namn");
+        var result = await formModal.Result;
+
+        if (result.Cancelled)
+        {
+            Console.WriteLine("Modal was cancelled");
+        }
+        else
+        {
+            var user = (User)result.Data;
+
+            await CreateUserAsync(user);
         }
 
         StateHasChanged();

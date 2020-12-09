@@ -2,6 +2,7 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using AzureStaticWebApps.Blazor.Authentication;
+using Blazored.Modal;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -21,6 +22,7 @@ namespace BlazorApp.Client
             builder.Services.AddOptions();
             builder.Services.AddAuthorizationCore();
             builder.Services.AddStaticWebAppsAuthentication();
+            builder.Services.AddBlazoredModal();
 
             await builder.Build().RunAsync();
         }

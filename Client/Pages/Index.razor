@@ -63,7 +63,7 @@
 
         try
         {
-            name = await Http.GetFromJsonAsync<string>($"/api/GetUser/{email}");
+            name = await Http.GetFromJsonAsync<string>($"/api/{email}");
         }
         catch (Exception ex)
         {

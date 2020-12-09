@@ -99,7 +99,7 @@
         var parameters = new ModalParameters();
         parameters.Add("Email", email);
 
-        var formModal = Modal.Show<NameModal>("Ange ditt namn");
+        var formModal = Modal.Show<NameModal>("Ange ditt namn", parameters);
         var result = await formModal.Result;
 
         if (result.Cancelled)

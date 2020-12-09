@@ -34,7 +34,7 @@ namespace BlazorApp.Api
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var data = JsonConvert.DeserializeObject<User>(requestBody);
 
-            var entity = await dbContext.Users.AddAsync(data, cts);
+            var entity = await dbContext.User.AddAsync(data, cts);
             await dbContext.SaveChangesAsync(cts);
 
             return new OkObjectResult(JsonConvert.SerializeObject(entity.Entity.Name));
@@ -47,7 +47,7 @@ namespace BlazorApp.Api
             CancellationToken cts,
             ILogger log)
         {
-            var user = await dbContext.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Email.ToLower() == email.ToLower(), cts);
+            var user = await dbContext.User.AsNoTracking().FirstOrDefaultAsync(x => x.Email.ToLower() == email.ToLower(), cts);
             if (user != null)
             {
                 return new OkObjectResult(JsonConvert.SerializeObject(user.Name));

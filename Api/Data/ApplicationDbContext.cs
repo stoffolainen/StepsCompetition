@@ -10,7 +10,7 @@ namespace BlazorApp.Api.Data
         {
         }
 
-        public DbSet<User> Users { get; set; }
-        public DbSet<Activity> Activities { get; set; }
+        public DbSet<User> User { get; set; }
+        public DbSet<Activity> Activity { get; set; }
     }
 }

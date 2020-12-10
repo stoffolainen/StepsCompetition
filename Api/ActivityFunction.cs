@@ -72,11 +72,12 @@ namespace BlazorApp.Api
             var numberOfDays = (DateTime.Today - new DateTime(2020, 12, 1)).TotalDays;
 
             var activities = await dbContext.Activity.AsNoTracking().ToListAsync(cts);
+            var totalSteps = activities?.Sum(x => x.Steps) ?? 0;
 
             return new ActivityData
             {
-                TotalSteps = activities?.Sum(x => x.Steps) ?? 0,
-                AvgSteps = activities?.Count / numberOfDays ?? 0
+                TotalSteps = totalSteps,
+                AvgSteps = totalSteps == 0 ? 0 : totalSteps / numberOfDays
             };
         }
     }

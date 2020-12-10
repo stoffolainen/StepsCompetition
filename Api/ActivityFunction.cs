@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using BlazorApp.Api.Data;
@@ -74,7 +75,7 @@ namespace BlazorApp.Api
 
             return new ActivityData
             {
-                TotalSteps = activities?.Count ?? 0,
+                TotalSteps = activities?.Sum(x => x.Steps) ?? 0,
                 AvgSteps = activities?.Count / numberOfDays ?? 0
             };
         }

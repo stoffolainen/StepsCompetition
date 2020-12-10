@@ -1,29 +1,11 @@
 ﻿@page "/"
-@using Microsoft.AspNetCore.Authorization
-@using BlazorApp.Client.Pages.tmp
-@using System.Text.Json
-@using System.Text
 @inject HttpClient Http
 
 <h1>Välkommen till stegtävlingen 2020!</h1>
 
 <AuthorizeView>
     <Authorized>
-        @if (count == 0)
-        {
-            @GetNameAsync(context.User.Identity.Name);
-
-            count++;
-        }
-
-        @if (string.IsNullOrEmpty(name))
-        {
-            <button type="button" class="btn btn-info" @onclick="(() => ShowModal())">Skapa användare</button>
-        }
-        else
-        {
-            <p>Hej, @name! För att registrera steg klicka <a href="/UserTest">här</a> eller välj "Registrera steg" i menyn.</p>
-        }
+        <p>För att registrera steg klicka <a href="activity">här</a> eller välj "Steg" i menyn.</p>
     </Authorized>
     <NotAuthorized>
         @{
@@ -40,7 +22,7 @@
                 <div class="row">
                     <div class="col-sm-12 col-md-9 col-lg-6">
                         <a class="btn btn-block btn-lg btn-social btn-@provider.Key" href="/.auth/login/@provider.Key">
-                            <span class="fa fa-@provider.Key"></span> Sign in with @provider.Value
+                            <span class="fa fa-@provider.Key"></span> Logga in med @provider.Value
                         </a>
                     </div>
                 </div>
@@ -48,72 +30,3 @@
         </div>
     </NotAuthorized>
 </AuthorizeView>
-
-@code
-{
-    [CascadingParameter] public IModalService Modal { get; set; }
-
-    private string name;
-    private string email;
-    private int count = 0;
-
-    private async Task GetNameAsync(string identityEmail)
-    {
-        email = identityEmail;
-
-        try
-        {
-            name = await Http.GetFromJsonAsync<string>($"/api/{email}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-        }
-
-        StateHasChanged();
-    }
-
-    private async Task CreateUserAsync(User user)
-    {
-        try
-        {
-            var data = JsonSerializer.Serialize(user);
-
-            var response = await Http.PostAsync("/api/PostUser", new StringContent(data, Encoding.UTF8, "application/json"));
-            var content = await response.Content.ReadAsStringAsync();
-
-            response.EnsureSuccessStatusCode();
-
-            name = JsonSerializer.Deserialize<string>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-        }
-
-        StateHasChanged();
-    }
-
-    private async Task ShowModal()
-    {
-        var parameters = new ModalParameters();
-        parameters.Add("Email", email);
-
-        var formModal = Modal.Show<NameModal>("Ange ditt namn", parameters);
-        var result = await formModal.Result;
-
-        if (result.Cancelled)
-        {
-            Console.WriteLine("Modal was cancelled");
-        }
-        else
-        {
-            var user = (User)result.Data;
-
-            await CreateUserAsync(user);
-        }
-
-        StateHasChanged();
-    }
-
-}

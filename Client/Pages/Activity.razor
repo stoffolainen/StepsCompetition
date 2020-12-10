@@ -1,0 +1,76 @@
+﻿@page "/activity"
+@using BlazorApp.Shared.Models
+@using Microsoft.AspNetCore.Authorization
+@using System.Text.Json
+@using System.Text
+@inject HttpClient Http
+@attribute [Authorize]
+
+<AuthorizeView>
+    <Authorized>
+        <h3>Aktuell ställning @DateTime.Today.ToLocalTime()</h3>
+
+        @if (activityData != null)
+        {
+            <p>Antal steg totalt: @activityData.TotalSteps</p> <p>Steg/dag i snitt: @activityData.AvgSteps</p>
+        }
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="step-input">Antal steg</label>
+                <input @bind="@steps" type="number" class="form-control" id="step-input" />
+            </div>
+            <div class="form-group">
+                <label for="activity-date">Datum för utförande</label>
+                <input @bind="@activityDate" type="date" class="form-control" id="activity-date" />
+            </div>
+            <button @onclick="(() => SaveStepsAsync(context.User.Identity.Name))" class="btn btn-primary">Spara</button>
+        </div>
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    private ActivityData activityData;
+    private int steps;
+    private DateTime activityDate = DateTime.Today;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            activityData = await Http.GetFromJsonAsync<ActivityData>("/api/GetActivityData");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+        }
+    }
+
+    private async Task SaveStepsAsync(string email)
+    {
+        var request = new ActivityRequest
+        {
+            ActivityDate = activityDate,
+            Email = email,
+            Steps = steps
+        };
+
+        try
+        {
+            var data = JsonSerializer.Serialize(request);
+
+            var response = await Http.PostAsync("/api/PostActivity", new StringContent(data, Encoding.UTF8, "application/json"));
+            var content = await response.Content.ReadAsStringAsync();
+
+            response.EnsureSuccessStatusCode();
+
+            activityData = JsonSerializer.Deserialize<ActivityData>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+        }
+
+        StateHasChanged();
+    }
+}

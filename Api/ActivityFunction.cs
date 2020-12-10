@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using BlazorApp.Api.Data;
 using BlazorApp.Api.Entities;
+using BlazorApp.Shared.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -25,35 +24,66 @@ namespace BlazorApp.Api
             this.dbContext = dbContext;
         }
 
-        [FunctionName("PostUser")]
-        public async Task<IActionResult> PostUserAsync(
+        [FunctionName("PostActivity")]
+        public async Task<IActionResult> PostActivityAsync(
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
             CancellationToken cts,
             ILogger log)
         {
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            var data = JsonConvert.DeserializeObject<User>(requestBody);
+            var data = JsonConvert.DeserializeObject<ActivityRequest>(requestBody);
 
-            var entity = await dbContext.User.AddAsync(data, cts);
+            var user = await dbContext.User.AsNoTracking().FirstOrDefaultAsync(x => x.Email.ToLower() == data.Email.ToLower(), cts);
+            if (user == null)
+            {
+                user = new User
+                {
+                    Created = DateTime.Now,
+                    Email = data.Email
+                };
+
+                await dbContext.User.AddAsync(user, cts);
+                await dbContext.SaveChangesAsync(cts);
+            }
+
+            var activity = new Activity
+            {
+                ActivityDate = data.ActivityDate,
+                Created = DateTime.Now,
+                UserId = user.UserId,
+                Steps = data.Steps
+            };
+
+            await dbContext.Activity.AddAsync(activity, cts);
             await dbContext.SaveChangesAsync(cts);
 
-            return new OkObjectResult(JsonConvert.SerializeObject(entity.Entity.Name));
+            var activityData = await GetActivityDataAsync(cts);
+
+            return new OkObjectResult(JsonConvert.SerializeObject(activityData));
         }
 
-        [FunctionName("GetUser")]
-        public async Task<IActionResult> GetUserAsync(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "{email}")] HttpRequest req,
-            string email,
+        [FunctionName("GetActivityData")]
+        public async Task<IActionResult> GetActivityDataAsync(
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
             CancellationToken cts,
             ILogger log)
         {
-            var user = await dbContext.User.AsNoTracking().FirstOrDefaultAsync(x => x.Email.ToLower() == email.ToLower(), cts);
-            if (user != null)
-            {
-                return new OkObjectResult(JsonConvert.SerializeObject(user.Name));
-            }
+            var activityData = await GetActivityDataAsync(cts);
 
-            return new NotFoundResult();
+            return new OkObjectResult(activityData);
+        }
+
+        private async Task<ActivityData> GetActivityDataAsync(CancellationToken cts)
+        {
+            var numberOfDays = (DateTime.Today - new DateTime(2020, 12, 1)).TotalDays;
+
+            var activities = await dbContext.Activity.AsNoTracking().ToListAsync(cts);
+
+            return new ActivityData
+            {
+                TotalSteps = activities?.Count ?? 0,
+                AvgSteps = activities?.Count / numberOfDays ?? 0
+            };
         }
     }
 }

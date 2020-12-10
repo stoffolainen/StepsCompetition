@@ -1,5 +1,6 @@
 using System;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using AzureStaticWebApps.Blazor.Authentication;
 using Blazored.Modal;
@@ -17,7 +18,7 @@ namespace BlazorApp.Client
 
             var baseAddress = builder.Configuration["BaseAddress"] ?? builder.HostEnvironment.BaseAddress;
 
-            builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(baseAddress) });
+            builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(baseAddress), DefaultRequestHeaders = { Accept = { MediaTypeWithQualityHeaderValue.Parse("application/json")}}});
 
             builder.Services.AddOptions();
             builder.Services.AddAuthorizationCore();

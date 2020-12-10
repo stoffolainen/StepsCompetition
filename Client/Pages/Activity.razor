@@ -12,10 +12,11 @@
 
         @if (activityData != null)
         {
-            <p>Antal steg totalt: @activityData.TotalSteps</p> <p>Steg/dag i snitt: @activityData.AvgSteps</p>
+            <p><strong>steg totalt: @activityData.TotalSteps</strong></p>
+            <p><strong>Steg/dag i snitt: @activityData.AvgSteps</strong></p>
         }
 
-        <div class="form-row">
+        <div class="simple-form">
             <div class="form-group">
                 <label for="step-input">Antal steg</label>
                 <input @bind="@steps" type="number" class="form-control" id="step-input" />

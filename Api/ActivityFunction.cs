@@ -57,21 +57,14 @@ namespace BlazorApp.Api
             await dbContext.Activity.AddAsync(activity, cts);
             await dbContext.SaveChangesAsync(cts);
 
-            var activityData = await GetActivityDataAsync(cts);
-
-            return new OkObjectResult(JsonConvert.SerializeObject(activityData));
+            return new OkObjectResult(await GetActivityDataAsync(cts));
         }
 
         [FunctionName("GetActivityData")]
         public async Task<IActionResult> GetActivityDataAsync(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
             CancellationToken cts,
-            ILogger log)
-        {
-            var activityData = await GetActivityDataAsync(cts);
-
-            return new OkObjectResult(activityData);
-        }
+            ILogger log) => new OkObjectResult(await GetActivityDataAsync(cts));
 
         private async Task<ActivityData> GetActivityDataAsync(CancellationToken cts)
         {

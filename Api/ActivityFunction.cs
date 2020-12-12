@@ -73,11 +73,13 @@ namespace BlazorApp.Api
 
             var activities = await dbContext.Activity.AsNoTracking().ToListAsync(cts);
             var totalSteps = activities?.Sum(x => x.Steps) ?? 0;
+            var totalUsers = await dbContext.User.CountAsync(cts);
 
             return new ActivityData
             {
                 TotalSteps = totalSteps,
-                AvgSteps = totalSteps == 0 ? 0 : totalSteps / numberOfDays
+                AvgGroupSteps = totalSteps == 0 ? 0 : totalSteps / numberOfDays,
+                AvgPersonSteps = totalSteps == 0 || totalUsers == 0 ? 0 : (totalSteps / numberOfDays) / totalUsers
             };
         }
     }

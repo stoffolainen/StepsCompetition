@@ -13,8 +13,8 @@
         @if (activityData != null)
         {
             <p>Steg totalt: <strong>@activityData.TotalSteps</strong></p>
-            <p>Steg/dag i snitt(hela gruppen): <strong>@activityData.AvgGroupSteps</strong></p>
-            <p>Steg/dag i snitt(personnivå): <strong>@activityData.AvgPersonSteps</strong></p>
+            <p>Steg/dag i snitt(hela gruppen): <strong>@Math.Round(activityData.AvgGroupSteps)</strong></p>
+            <p>Steg/dag i snitt(personnivå): <strong>@Math.Round(activityData.AvgPersonSteps)</strong></p>
 
             <div class="simple-form">
                 <div class="form-group">
@@ -58,16 +58,16 @@
 
     private async Task SaveStepsAsync(string email)
     {
-        activityData = null;
-        steps = 0;
-        activityDate = DateTime.Today;
-
         var request = new ActivityRequest
         {
             ActivityDate = activityDate,
             Email = email,
             Steps = steps
         };
+
+        activityData = null;
+        steps = 0;
+        activityDate = DateTime.Today;
 
         try
         {
